@@ -6,6 +6,7 @@ const directionRouter = require("./router/directionRouter");
 
 const app = express();
 const PORT = 3001;
+app.use(express.json());
 
 // CORS 설정
 app.use(

@@ -1,9 +1,11 @@
 const express = require("express");
-const { getDirection } = require("../controller/directionController");
+const directionController = require("../controller/directionController");
+
 
 const router = express.Router();
 
 // Direction 라우트
-router.get("/", getDirection);
+router.get('/normal-direction', directionController.getNormalRoute);
+router.get('/safe-direction', directionController.getSafeRoute);
 
 module.exports = router;
