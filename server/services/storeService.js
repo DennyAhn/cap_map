@@ -10,7 +10,7 @@ const storeService = {
         longitude: coordinates[midIndex][0]
       };
 
-      console.log('편의점 검색 중심점:', midPoint);
+      //console.log('편의점 검색 중심점:', midPoint);
 
       const response = await fetch(
         `https://dapi.kakao.com/v2/local/search/category.json?category_group_code=CS2&x=${midPoint.longitude}&y=${midPoint.latitude}&radius=1000&size=15`,
@@ -39,11 +39,11 @@ const storeService = {
         distance: parseFloat(store.distance)
       }));
 
-      console.log('편의점 데이터 처리 완료:', {
+      /*console.log('편의점 데이터 처리 완료:', {
         count: stores.length,
         sample: stores[0]
       });
-
+*/
       return stores;
 
     } catch (error) {

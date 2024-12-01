@@ -41,7 +41,7 @@ const tmapService = {
         responses.map(response => tmapService.processResponse(response))
       );
 
-      console.log('TMap 경로 응답:', JSON.stringify(routes[0], null, 2));
+      //console.log('TMap 경로 응답:', JSON.stringify(routes[0], null, 2));
 
       routes.forEach((route, index) => {
         if (!route.features || !route.features[0]?.geometry?.coordinates) {

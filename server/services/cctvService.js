@@ -26,14 +26,14 @@ const cctvService = {
 
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('API 응답 상세:', errorData);
+        //console.error('API 응답 상세:', errorData);
         throw new Error(`CCTV 데이터 가져오기 실패: ${response.status}`);
       }
 
       const data = await response.json();
       
       if (!data.data) {
-        console.error('API 응답 데이터:', data);
+        //console.error('API 응답 데이터:', data);
         throw new Error('유효하지 않은 데이터 형식');
       }
 
@@ -50,7 +50,7 @@ const cctvService = {
       }));
 
     } catch (error) {
-      console.error('CCTV 데이터 요청 실패:', error);
+      //console.error('CCTV 데이터 요청 실패:', error);
       throw new Error('CCTV 데이터 가져오기 실패');
     }
   }

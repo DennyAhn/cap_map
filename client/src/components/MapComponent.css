@@ -1,92 +1,208 @@
 /* 기본 스타일 */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 스크롤 방지 */
+  position: fixed; /* 화면 고정 */
+  width: 100%;
+  height: 100%;
+}
+
 .container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .map-container {
-    width: 100vw;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100%;
+}
+
+.map-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* 맵 클릭 허용 */
+  z-index: 1000;
+  /*overflow: hidden; /* 스크롤 방지 */
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.overlay {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.search-bar {
+  width: 80%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: white;
+}
+
+.button-group {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.button {
+  padding: 10px 15px;
+  border-radius: 5px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.route-info {
+  display: none;
+  position: absolute;
+  top: 70px;
+  left: 20px;
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  z-index: 100;
+  min-width: 200px;
+}
+
+/* 모바일 화면에 맞춘 스타일 */
+@media (max-width: 768px) {
+  .container {
+    padding: 0; /* 패딩 제거 */
     height: 100vh;
-    position: relative;
   }
-  
+
+  .map-container {
+    height: 100vh;
+    position: fixed;
+  }
+/*
   .map {
-    width: 100%;
-    height: 100%;
-  }
+    /*height: 300px; 모바일에서 지도의 높이를 줄임 */
   
-  .overlay {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    z-index: 1000;
-  }
-  
-  .search-bar {
-    width: 80%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: white;
-  }
-  
-  .button-group {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    z-index: 1000;
-  }
-  
+
   .button {
-    padding: 10px 15px;
-    border-radius: 5px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 14px;
   }
-  
+
   .route-info {
-    display: none;
-    position: absolute;
-    top: 70px;
-    left: 20px;
-    background-color: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    z-index: 100;
-    min-width: 200px;
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+/* 터치 동작 최적화 */
+* {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version */
+  -webkit-tap-highlight-color: transparent; /* iOS Safari */
+}
+
+/* 필요한 요소만 터치/선택 가능하도록 설정 */
+input, textarea {
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.route-buttons {
+  position: fixed;
+  top: 140px; /* 검색창 아래로 위치 */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 400px;
+}
+
+.route-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  border: 1px solid;
+  min-width: 100px;
+}
+
+.route-button:first-child {
+  border-color: #2db400;
+  background-color: #fff;
+  color: #333;
+}
+
+.route-button:first-child.active {
+  background-color: #2db400;
+  color: #fff;
+}
+
+.route-button:last-child {
+  border-color: #4CAF50;
+  background-color: #fff;
+  color: #333;
+}
+
+.route-button:last-child.active {
+  background-color: #4CAF50;
+  color: #fff;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+  .search-and-buttons-container {
+    width: calc(100% - 40px);
+    top: 140px;
+    gap: 15px;
   }
   
-  /* 모바일 화면에 맞춘 스타일 */
-  @media (max-width: 768px) {
-    .container {
-      padding: 10px;
-    }
-  
-    /*.map {
-      /*height: 300px; 모바일에서 지도의 높이를 줄임 */
-    
-    
-  
-    .button {
-      padding: 8px 12px;
-      font-size: 14px;
-    }
-  
-    .route-info {
-      font-size: 14px;
-      padding: 10px;
-    }
+  .route-buttons {
+    margin-top: 15px;
   }
+  
+  .route-button {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 80px;
+  }
+}

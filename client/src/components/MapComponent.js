@@ -2,13 +2,23 @@ import React, { useEffect, useRef, useState } from 'react';
 import './MapComponent.css'; // CSS 파일 import
 import MapService from './MapService';
 import RouteService from './RouteService';
+import RouteInfoPanel from './s_bt';  // 파일 import
+import AddressToCoords from './AddressToCoord';
 
-const MapComponent = ({ startCoords, goalCoords }) => {
+const MapComponent = () => {
   const mapRef = useRef(null);
   const [routeType, setRouteType] = useState('normal');
   const [routeInfo, setRouteInfo] = useState(null);
+  const [startCoords, setStartCoords] = useState(null);
+  const [goalCoords, setGoalCoords] = useState(null);
   const mapService = useRef(null);
   const routeService = useRef(null);
+
+  // 경로 초기화 함수
+  const resetRouteInfo = () => {
+    console.log("경로 초기화 호출됨");
+    setRouteInfo(null);
+  };
 
   // 지도 초기화
   useEffect(() => {
@@ -71,131 +81,31 @@ const MapComponent = ({ startCoords, goalCoords }) => {
   return (
     <div className="map-container">
       <div ref={mapRef} className="map" />
-      {/* 경로 타입 선택 버튼 */}
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        zIndex: 100,
-        display: 'flex',
-        gap: '10px'
-      }}>
+      <AddressToCoords 
+        setStartCoords={setStartCoords}
+        setGoalCoords={setGoalCoords}
+        resetRouteInfo={resetRouteInfo}
+      />
+      <div className="route-buttons">
         <button
           onClick={() => setRouteType('normal')}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: routeType === 'normal' ? '#2db400' : '#fff',
-            color: routeType === 'normal' ? '#fff' : '#333',
-            border: '1px solid #2db400',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
+          className={`route-button ${routeType === 'normal' ? 'active' : ''}`}
         >
           일반 경로
         </button>
         <button
           onClick={() => setRouteType('safe')}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: routeType === 'safe' ? '#4CAF50' : '#fff',
-            color: routeType === 'safe' ? '#fff' : '#333',
-            border: '1px solid #4CAF50',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
+          className={`route-button ${routeType === 'safe' ? 'active' : ''}`}
         >
           안전 경로
         </button>
       </div>
-
-      {/* 경로 정보 표시 */}
-      {routeInfo && !routeInfo.error && (
-        <div style={{
-          position: 'absolute',
-          top: '70px',
-          left: '20px',
-          backgroundColor: 'white',
-          padding: '15px',
-          borderRadius: '8px',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-          zIndex: 100,
-          minWidth: '200px'
-        }}>
-          <div style={{ 
-            fontSize: '16px', 
-            fontWeight: 'bold',
-            marginBottom: '8px',
-            color: '#333'
-          }}>
-            {routeType === 'normal' ? '도보 경로 정보' : '안전 경로 정보'}
-          </div>
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '8px' 
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#666' }}>총 거리:</span>
-              <span style={{ color: '#2db400', fontWeight: 'bold' }}>
-                {formatDistance(routeInfo.distance)}
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#666' }}>예상 소요 시간:</span>
-              <span style={{ color: '#2db400', fontWeight: 'bold' }}>
-                {formatTime(routeInfo.time)}
-              </span>
-            </div>
-            
-            {routeType === 'safe' && routeInfo?.safety && (
-              <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#666' }}>경로 안전도:</span>
-                  <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>
-                    {routeInfo.safety.grade}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#666' }}>CCTV 수:</span>
-                  <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>
-                    {routeInfo.cctvCount}개
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#666' }}>편의점 수:</span>
-                  <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>
-                    {routeInfo.storeCount}개
-                  </span>
-                </div>
-                {/*<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#666' }}>안전 커버리지:</span>
-                  <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>
-                    {routeInfo.safety.coverageRatio}%
-                  </span>
-                </div> */}
-              </>
-            )}
-          </div>
-        </div>
-      )}
-      
-      {routeInfo?.error && (
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '20px',
-          backgroundColor: '#fff3f3',
-          padding: '15px',
-          borderRadius: '8px',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-          color: '#ff0000',
-          zIndex: 100
-        }}>
-          {routeInfo.error}
-        </div>
-      )}
+      <RouteInfoPanel 
+        routeInfo={routeInfo}
+        routeType={routeType}
+        formatDistance={formatDistance}
+        formatTime={formatTime}
+      />
     </div>
   );
 };

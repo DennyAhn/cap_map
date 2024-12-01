@@ -31,16 +31,46 @@ class RouteService {
     try {
       this.clearMap();
 
+      // 마커 크기 계산 함수
+      const calculateMarkerSize = () => {
+        const zoom = this.mapInstance.getZoom();
+        const baseSize = 48; // 기본 크기
+        const scale = Math.max(0.5, Math.min(2, zoom / 12)); // 줌 레벨 12를 기준으로 0.5~2 사이의 스케일 계산
+        return Math.round(baseSize * scale);
+      };
+
+      // 마커 업데이트 함수
+      const updateMarkers = () => {
+        const size = calculateMarkerSize();
+        const half = size / 2;
+
+        startMarker.setIcon({
+          url: '/images/start.png',
+          size: new naver.maps.Size(size, size),
+          scaledSize: new naver.maps.Size(size, size),
+          origin: new naver.maps.Point(0, 0),
+          anchor: new naver.maps.Point(half, half)
+        });
+
+        endMarker.setIcon({
+          url: '/images/goal.png',
+          size: new naver.maps.Size(size, size),
+          scaledSize: new naver.maps.Size(size, size),
+          origin: new naver.maps.Point(0, 0),
+          anchor: new naver.maps.Point(half, half)
+        });
+      };
+
       // 출발지 마커 생성
       const startMarker = new naver.maps.Marker({
         position: new naver.maps.LatLng(startCoords.latitude, startCoords.longitude),
         map: this.mapInstance,
         icon: {
-          content: `
-            <div style="position: relative;">
-              <div style="width: 16px; height: 16px; background: #2db400; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
-            </div>`,
-          anchor: new naver.maps.Point(8, 8)
+          url: '/images/start.png',
+          size: new naver.maps.Size(48, 48),
+          scaledSize: new naver.maps.Size(48, 48),
+          origin: new naver.maps.Point(0, 0),
+          anchor: new naver.maps.Point(24, 24)
         }
       });
 
@@ -49,13 +79,16 @@ class RouteService {
         position: new naver.maps.LatLng(goalCoords.latitude, goalCoords.longitude),
         map: this.mapInstance,
         icon: {
-          content: `
-            <div style="position: relative;">
-              <div style="width: 16px; height: 16px; background: #ff0000; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
-            </div>`,
-          anchor: new naver.maps.Point(8, 8)
+          url: '/images/goal.png',
+          size: new naver.maps.Size(48, 48),
+          scaledSize: new naver.maps.Size(48, 48),
+          origin: new naver.maps.Point(0, 0),
+          anchor: new naver.maps.Point(24, 24)
         }
       });
+
+      // 줌 변경 이벤트 리스너 추가
+      naver.maps.Event.addListener(this.mapInstance, 'zoom_changed', updateMarkers);
 
       this.markers.push(startMarker, endMarker);
 

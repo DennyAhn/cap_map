@@ -6,6 +6,7 @@ const AddressToCoords = ({ setStartCoords, setGoalCoords }) => {
   const [goalAddress, setGoalAddress] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [searchResult, setSearchResult] = useState("");
+  const [isFirstSearch, setIsFirstSearch] = useState(true);
 
   // 카표 형식 통일화 함수
   const formatCoords = (latitude, longitude) => {
@@ -104,6 +105,7 @@ const AddressToCoords = ({ setStartCoords, setGoalCoords }) => {
   const handleSearch = () => {
     setErrorMessage("");
     setSearchResult("");
+    setIsFirstSearch(false);
 
     if (!startAddress || !goalAddress) {
       setErrorMessage("출발지와 도착지 모두 입력하세요.");
@@ -115,25 +117,30 @@ const AddressToCoords = ({ setStartCoords, setGoalCoords }) => {
   };
 
   return (
-    <div>
-      <h3>주소 입력</h3>
-      <input
-        id="start-address-input"
-        type="text"
-        placeholder="출발지 입력"
-        value={startAddress}
-        onChange={(e) => setStartAddress(e.target.value)}
-      />
-      <input
-        id="goal-address-input"
-        type="text"
-        placeholder="도착지 입력"
-        value={goalAddress}
-        onChange={(e) => setGoalAddress(e.target.value)}
-      />
-      <button onClick={handleSearch}>검색</button>
-      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
-      <pre style={{ whiteSpace: "pre-line" }}>{searchResult}</pre>
+    <div className="search-container">
+      <div className="search-box">
+        <input
+          id="start-address-input"
+          type="text"
+          placeholder="출발지 입력"
+          value={startAddress}
+          onChange={(e) => setStartAddress(e.target.value)}
+          className="search-input"
+          disabled={!isFirstSearch}
+        />
+        <input
+          id="goal-address-input"
+          type="text"
+          placeholder="도착지 입력"
+          value={goalAddress}
+          onChange={(e) => setGoalAddress(e.target.value)}
+          className="search-input"
+        />
+        <button onClick={handleSearch} className="search-button">
+          검색
+        </button>
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
+      </div>
     </div>
   );
 };

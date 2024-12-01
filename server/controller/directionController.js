@@ -54,11 +54,12 @@ const directionController = {
       // 객체를 문자열로 변환
       const startCoord = typeof start === 'object' ? formatCoords(start) : start;
       const goalCoord = typeof goal === 'object' ? formatCoords(goal) : goal;
-
+/*
       console.log('최단 경로 검색 요청:', {
         start: startCoord,
         goal: goalCoord
       });
+      */
 
       // 최단 경로 옵션 추가
       const routeOptions = {
@@ -88,7 +89,7 @@ const directionController = {
   getSafeRoute: async (req, res) => {
     try {
       const { start, goal } = req.query;
-      console.log('안전 경로 검색 시작:', { start, goal });
+      //console.log('안전 경로 검색 시작:', { start, goal });
 
       // 객체를 문자열로 변환
       const startCoord = typeof start === 'object' ? formatCoords(start) : start;
@@ -96,10 +97,10 @@ const directionController = {
 
       // CCTV 데이터 가져오기
       const cctvData = await cctvService.getCCTVData();
-      console.log('CCTV 데이터 조회 완료:', cctvData.length + '개');
+      //console.log('CCTV 데이터 조회 완료:', cctvData.length + '개');
       
       const routes = await tmapService.getMultipleRoutes(startCoord, goalCoord);
-      console.log(`${routes.length}개의 경로 조회 완료`);
+      //console.log(`${routes.length}개의 경로 조회 완료`);
 
       // 각 경로에 대해 안전도 계산
       const validRoutes = await safetyService.calculateRouteSafety(routes, cctvData);
@@ -110,14 +111,14 @@ const directionController = {
 
       // 최적 경로 선택
       const bestRoute = safetyService.selectBestRoute(validRoutes);
-      console.log('최적 경로 선택:', {
+      /*console.log('최적 경로 선택:', {
         safety: bestRoute.safety,
         cctvCount: bestRoute.safety.cctvCount,
         storeCount: bestRoute.safety.storeCount,
         coverageRatio: bestRoute.safety.coverageRatio,
         totalDistance: bestRoute.features[0].properties.totalDistance,
         totalTime: bestRoute.features[0].properties.totalTime
-      });
+      });*/
 
       res.json({
         success: true,
