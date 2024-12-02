@@ -1,0 +1,181 @@
+.map-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* 헤더 스타일 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-image {
+  height: 30px;  /* 원하는 크기로 조절 */
+  width: auto;
+  object-fit: contain;
+}
+
+.menu-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* 검색바 스타일 */
+.search-bar {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 500px;
+  z-index: 2;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  height: 48px;
+}
+
+.search-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+}
+
+.voice-icon {
+  width: 24px;
+  height: 24px;
+  margin-left: 12px;
+  cursor: pointer;
+}
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
+  margin-left: 12px;
+  cursor: pointer;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 8px 0;
+  font-size: 16px;
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+/* 필터 버튼 스타일 */
+.filter-buttons-container {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+}
+
+.filter-buttons-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-buttons-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.filter-button-icon {
+  font-size: 16px;
+}
+
+/* 지도 컨테이너 */
+.map-component-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* NaverMap이 사용하는 실제 지도 컨테이너 */
+.map-component-container > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  .header {
+    padding: 8px 12px;
+  }
+
+  .search-bar {
+    margin: 8px 12px;
+  }
+
+  .filter-buttons-container {
+    padding: 8px 12px;
+  }
+
+  .filter-button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+/* 추가: 모바일 Safari 대응 */
+@supports (-webkit-touch-callout: none) {
+  .map-container,
+  .map-component-container {
+    height: -webkit-fill-available;
+  }
+  
+  .map-component-container > div {
+    height: -webkit-fill-available !important;
+  }
+} 

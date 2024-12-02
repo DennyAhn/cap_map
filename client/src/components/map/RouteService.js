@@ -124,7 +124,7 @@ class RouteService {
         this.pathInstance = new naver.maps.Polyline({
           map: this.mapInstance,
           path: pathCoordinates.map(coord => new naver.maps.LatLng(coord[1], coord[0])),
-          strokeColor: '#5347AA',
+          strokeColor: '#87CEEB',
           strokeWeight: 5
         });
 
@@ -195,12 +195,20 @@ class RouteService {
         boxShadow: "0 2px 6px rgba(0,0,0,0.3)"
       });
 
+      let isInfoWindowOpen = false;
+      
       naver.maps.Event.addListener(marker, 'click', () => {
-        if (this.currentInfoWindow) {
-          this.currentInfoWindow.close();
+        if (isInfoWindowOpen) {
+          infoWindow.close();
+          isInfoWindowOpen = false;
+        } else {
+          if (this.currentInfoWindow) {
+            this.currentInfoWindow.close();
+          }
+          infoWindow.open(this.mapInstance, marker);
+          this.currentInfoWindow = infoWindow;
+          isInfoWindowOpen = true;
         }
-        infoWindow.open(this.mapInstance, marker);
-        this.currentInfoWindow = infoWindow;
       });
 
       this.cctvMarkers.push(marker);
@@ -215,8 +223,8 @@ class RouteService {
         icon: {
           content: `
             <div style="position: relative;">
-              <div style="width: 24px; height: 24px; background: #4CAF50; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center;">
-                <div style="font-size: 12px; color: white;">C</div>
+              <div style="width: 24px; height: 24px; background: #00BFFF; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center;">
+                <div style="font-size: 12px; color: white;">편</div>
               </div>
             </div>`,
           anchor: new naver.maps.Point(12, 12)
@@ -237,12 +245,20 @@ class RouteService {
         boxShadow: "0 2px 6px rgba(0,0,0,0.3)"
       });
 
+      let isInfoWindowOpen = false;
+
       naver.maps.Event.addListener(marker, 'click', () => {
-        if (this.currentInfoWindow) {
-          this.currentInfoWindow.close();
+        if (isInfoWindowOpen) {
+          infoWindow.close();
+          isInfoWindowOpen = false;
+        } else {
+          if (this.currentInfoWindow) {
+            this.currentInfoWindow.close();
+          }
+          infoWindow.open(this.mapInstance, marker);
+          this.currentInfoWindow = infoWindow;
+          isInfoWindowOpen = true;
         }
-        infoWindow.open(this.mapInstance, marker);
-        this.currentInfoWindow = infoWindow;
       });
 
       this.storeMarkers.push(marker);

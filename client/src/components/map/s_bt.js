@@ -25,7 +25,7 @@ const RouteInfoPanel = ({
       const currentY = e.touches[0].clientY;
       const deltaY = startY - currentY;
 
-      if (deltaY > 50) { // 위로 스와이프
+      if (deltaY > 60) { // 위로 스와이프
         setIsPanelOpen(true);
       } else if (deltaY < -50) { // 아래로 스와이프
         setIsPanelOpen(false);

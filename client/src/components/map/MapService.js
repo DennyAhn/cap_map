@@ -1,9 +1,11 @@
 /* global naver */
 
 class MapService {
-    constructor(mapElement) {
+    constructor(mapElement, initialPosition = null) {
       this.mapInstance = new naver.maps.Map(mapElement, {
-        center: new naver.maps.LatLng(35.8714354, 128.601445),
+        center: initialPosition 
+          ? new naver.maps.LatLng(initialPosition.latitude, initialPosition.longitude)
+          : new naver.maps.LatLng(35.8714354, 128.601445),
         zoom: 14,
       });
       this.currentLocationMarker = null;
@@ -47,14 +49,14 @@ class MapService {
         infoWindow.open(this.mapInstance, this.currentLocationMarker);
       });
     }
-  /*
+  
     createMarker(position, options) {
       return new naver.maps.Marker({
         position: new naver.maps.LatLng(position.latitude, position.longitude),
         map: this.mapInstance,
         ...options
       });
-    }*/
+    }
   
     createPolyline(path, options) {
       return new naver.maps.Polyline({
@@ -78,17 +80,18 @@ class MapService {
       });
     }
   
-    setMarker(coordinates, iconUrl) {
-      new naver.maps.Marker({
-        position: new naver.maps.LatLng(coordinates.latitude, coordinates.longitude),
-        map: this.mapInstance,
-        icon: {
-          url: iconUrl,
-          size: new naver.maps.Size(24, 24),
-          origin: new naver.maps.Point(0, 0),
-          anchor: new naver.maps.Point(12, 12)
-        }
-      });
+    panToLocation(coords) {
+      if (this.mapInstance) {
+        const position = new window.naver.maps.LatLng(coords.latitude, coords.longitude);
+        this.mapInstance.panTo(position);
+      }
+    }
+  
+    updateCurrentLocationMarker(coords) {
+      if (this.currentLocationMarker && coords) {
+        const position = new window.naver.maps.LatLng(coords.latitude, coords.longitude);
+        this.currentLocationMarker.setPosition(position);
+      }
     }
   }
   

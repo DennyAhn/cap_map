@@ -1,22 +1,50 @@
 import React, { useState } from "react";
-import MapComponent from "./components/MapComponent";
-import AddressToCoord from "./components/AddressToCoord"; // 파일명 수정
+import Map from "./components/map/Map";
+import CustomSettingsPanel from "./components/map/CustomSettingsPanel";
+import RouteSelectionScreen from "./components/search/RouteSelectionScreen";
+import "./App.css";
 
 const App = () => {
-  const [startCoords, setStartCoords] = useState(null);
-  const [goalCoords, setGoalCoords] = useState(null);
+  const [selectedMode, setSelectedMode] = useState('일반');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState(null);
+
+  const handleModeChange = (mode) => {
+    setSelectedMode(mode);
+  };
+
+  const handleDestinationSelect = (destination) => {
+    setSelectedDestination(destination);
+    setIsSearchOpen(false);
+  };
+
+  const handleRouteBack = () => {
+    setSelectedDestination(null);
+  };
 
   return (
-    <div>
-      
-      <AddressToCoord 
-        setStartCoords={setStartCoords} 
-        setGoalCoords={setGoalCoords} 
-      />
-      <MapComponent 
-        startCoords={startCoords} 
-        goalCoords={goalCoords} 
-      />
+    <div className="App">
+      {selectedDestination ? (
+        <RouteSelectionScreen 
+          destination={selectedDestination}
+          onBack={handleRouteBack}
+        />
+      ) : (
+        <>
+          <Map 
+            selectedMode={selectedMode}
+            isSearchOpen={isSearchOpen}
+            setIsSearchOpen={setIsSearchOpen}
+            onNavigate={handleDestinationSelect}
+          />
+          {!isSearchOpen && (
+            <CustomSettingsPanel 
+              onModeChange={handleModeChange}
+              selectedMode={selectedMode}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };
