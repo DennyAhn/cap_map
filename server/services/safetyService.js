@@ -21,7 +21,7 @@ const storeService = {
         longitude: parseFloat(midCoord[0])
       };
 
-      console.log('편의점 검색 중심점:', midPoint);
+      //console.log('편의점 검색 중심점:', midPoint);
 
       const response = await fetch(
         `https://dapi.kakao.com/v2/local/search/category.json?category_group_code=CS2&x=${midPoint.longitude}&y=${midPoint.latitude}&radius=1000&size=15`,
