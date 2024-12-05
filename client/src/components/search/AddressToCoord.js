@@ -102,7 +102,7 @@ const AddressToCoords = ({ setStartCoords, setGoalCoords }) => {
   }, [setStartCoords, setGoalCoords]);
 
   // 검색 버튼 클릭 (카카오 API 사용)
-  const handleSearch = () => {
+/*  const handleSearch = () => {
     setErrorMessage("");
     setSearchResult("");
     setIsFirstSearch(false);
@@ -142,7 +142,7 @@ const AddressToCoords = ({ setStartCoords, setGoalCoords }) => {
         {errorMessage && <p className="error-message">{errorMessage}</p>}
       </div>
     </div>
-  );
+  );*/
 };
 
 export default AddressToCoords;

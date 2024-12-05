@@ -6,7 +6,7 @@ import RouteInfoPanel from '../map/s_bt';
 import './RouteSelectionScreen.css';
 import axios from 'axios';
 
-const RouteSelectionScreen = ({ destination, onBack }) => {
+const RouteSelectionScreen = ({ destination, onBack, onNavigate }) => {
   const [isSearchingStart, setIsSearchingStart] = useState(false);
   const [isSearchingDestination, setIsSearchingDestination] = useState(false);
   const [startLocation, setStartLocation] = useState(null);
@@ -34,15 +34,23 @@ const RouteSelectionScreen = ({ destination, onBack }) => {
     }
   }, [startLocation, destination, routeType]);
 
-  // 맵 초기화 useEffect를 분리
+  // 맵 초기화 useEffect 수정
   useEffect(() => {
-    // 현재 위치만 있어도 맵을 초기화하도록 수정
-    if (mapRef.current && startLocation) {
-      mapServiceRef.current = new MapService(mapRef.current, startLocation.coords);
+    if (mapRef.current) {
+      // 시작 위치가 없어도 맵을 초기화하도록 변경
+      const initialCoords = startLocation?.coords || {
+        latitude: 37.5665, // 서울시청 좌표(기본값)
+        longitude: 126.9780
+      };
+      
+      mapServiceRef.current = new MapService(mapRef.current, initialCoords);
       routeServiceRef.current = new RouteService(mapServiceRef.current.getMapInstance());
-      mapServiceRef.current.setCurrentLocation(startLocation.coords);
+      
+      if (startLocation) {
+        mapServiceRef.current.setCurrentLocation(startLocation.coords);
+      }
     }
-  }, [startLocation]);
+  }, [mapRef.current]); // 의존성 배열 수정
 
   // 경로 그리기는 별도의 useEffect로 분리
   useEffect(() => {
@@ -138,11 +146,21 @@ const RouteSelectionScreen = ({ destination, onBack }) => {
     );
   }
 
+  const handleBackClick = () => {
+    if (isSearchingStart) {
+      setIsSearchingStart(false);
+    } else if (isSearchingDestination) {
+      setIsSearchingDestination(false);
+    } else {
+      onBack();
+    }
+  };
+
   return (
     <div className="route-selection-screen">
       <div className="route-header">
         <div className="header-top">
-          <button className="back-button" onClick={onBack}>
+          <button className="back-button" onClick={handleBackClick}>
             ✕
           </button>
         </div>
@@ -180,14 +198,22 @@ const RouteSelectionScreen = ({ destination, onBack }) => {
           className={`transport-tab ${routeType === 'normal' ? 'active' : ''}`}
           onClick={() => setRouteType('normal')}
         >
-          <span className="tab-icon">🚶</span>
+          <img 
+            src="/images/RouteSelectionScreen/normal.svg" 
+            alt="일반 경로"
+            className="tab-icon"
+          />
           <span className="tab-text">일반</span>
         </button>
         <button 
           className={`transport-tab ${routeType === 'safe' ? 'active' : ''}`}
           onClick={() => setRouteType('safe')}
         >
-          <span className="tab-icon">🛡️</span>
+          <img 
+            src="/images/RouteSelectionScreen/safe.svg" 
+            alt="안전 경로"
+            className="tab-icon"
+          />
           <span className="tab-text">안전</span>
         </button>
       </div>

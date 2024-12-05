@@ -5,7 +5,7 @@ import './CustomSettingsPanel.css';
 // 사용자 설정 패널 컴포넌트
 // 드래그 가능한 바텀 시트 형태의 설정 패널 제공
 
-const CustomSettingsPanel = ({ onModeChange, selectedMode }) => {
+const CustomSettingsPanel = ({ onModeChange, selectedMode = '일반' }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [dragStart, setDragStart] = useState(null);
   const [dragOffset, setDragOffset] = useState(0);
@@ -116,7 +116,11 @@ const CustomSettingsPanel = ({ onModeChange, selectedMode }) => {
               onClick={() => handleModeSelect('일반')}
             >
               <div className="icon-circle">
-                <span className="icon">👤</span>
+                <img 
+                  src="/images/panel/human-male-yellow.svg" 
+                  alt="일반"
+                  className="mode-icon"
+                />
               </div>
               <span>일반</span>
             </button>
@@ -126,7 +130,11 @@ const CustomSettingsPanel = ({ onModeChange, selectedMode }) => {
               onClick={() => handleModeSelect('여성')}
             >
               <div className="icon-circle">
-                <span className="icon">👩</span>
+                <img 
+                  src="/images/panel/human-female-yellow.svg" 
+                  alt="여성"
+                  className="mode-icon"
+                />
               </div>
               <span>여성</span>
             </button>
@@ -136,7 +144,11 @@ const CustomSettingsPanel = ({ onModeChange, selectedMode }) => {
               onClick={() => handleModeSelect('노약자')}
             >
               <div className="icon-circle">
-                <span className="icon">♿</span>
+                <img 
+                  src="/images/panel/human-wheelchair-yellow.svg" 
+                  alt="노약자"
+                  className="mode-icon"
+                />
               </div>
               <span>노약자</span>
             </button>
@@ -150,10 +162,6 @@ const CustomSettingsPanel = ({ onModeChange, selectedMode }) => {
 CustomSettingsPanel.propTypes = {
   onModeChange: PropTypes.func.isRequired,
   selectedMode: PropTypes.string
-};
-
-CustomSettingsPanel.defaultProps = {
-  selectedMode: '일반'
 };
 
 export default CustomSettingsPanel;

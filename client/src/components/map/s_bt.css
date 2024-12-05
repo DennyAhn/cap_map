@@ -12,7 +12,11 @@
 }
 
 .settings-panel.open {
-  transform: translateY(0);
+  transform: translateY(calc(100% - 210px));
+}
+
+.settings-panel.open.safe-mode {
+  transform: translateY(calc(100% - 280px));
 }
 
 .settings-panel.dragging {
@@ -45,9 +49,13 @@
 }
 
 .panel-content {
-  padding: 15px;
-  max-height: 400px;
-  overflow-y: auto;
+  padding: 0 20px 20px 20px;
+  height: 100%;
+  overflow: hidden;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .settings-section {

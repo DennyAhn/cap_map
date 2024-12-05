@@ -1,191 +1,131 @@
+/* global naver */
 import React, { useEffect, useRef, useState } from 'react';
 import MapService from './MapService';
-import RouteService from './RouteService';
+import MarkerService from './MarkerService';
+import { fetchPlacesData } from './placesAPI';
 
-const MapComponent = ({ startCoords, goalCoords }) => {
+const MapComponent = ({ selectedMode, activeFilters, setActiveFilters, onFilterClick }) => {
   const mapRef = useRef(null);
-  const [routeType, setRouteType] = useState('normal');
-  const [routeInfo, setRouteInfo] = useState(null);
-  const [currentLocation, setCurrentLocation] = useState(null);
   const mapService = useRef(null);
-  const routeService = useRef(null);
-  const locationWatcher = useRef(null);
+  const markerService = useRef(null);
+  const [isMapReady, setIsMapReady] = useState(false);
+  const watchPositionId = useRef(null);
+  const prevActiveFilters = useRef(new Set());
 
   // 지도 초기화
   useEffect(() => {
-    const initializeMap = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            const initialPosition = { latitude, longitude };
+    let isSubscribed = true;
 
-            setCurrentLocation(initialPosition);
-            if (window.naver && window.naver.maps) {
-              mapService.current = new MapService(mapRef.current, initialPosition);
-              routeService.current = new RouteService(mapService.current.getMapInstance());
-              mapService.current.setCurrentLocation(initialPosition);
+    const initializeMap = async () => {
+      if (!mapRef.current || mapService.current) return;
+
+      try {
+        if (!window.naver || !window.naver.maps) {
+          console.error('Naver Maps API is not loaded');
+          return;
+        }
+
+        // 현재 위치 가져오기
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              if (!isSubscribed) return;
+              
+              const { latitude, longitude } = position.coords;
+              console.log('Current position:', { latitude, longitude });
+              
+              // 지도 초기화 및 현재 위치로 설정
+              mapService.current = new MapService(mapRef.current, { latitude, longitude });
+              markerService.current = new MarkerService();
+              setIsMapReady(true);
+
+              // 실시간 위치 추적 시작
+              watchPositionId.current = navigator.geolocation.watchPosition(
+                (newPosition) => {
+                  if (mapService.current) {
+                    mapService.current.updateCurrentLocation({
+                      latitude: newPosition.coords.latitude,
+                      longitude: newPosition.coords.longitude
+                    });
+                  }
+                },
+                (error) => console.error('위치 추적 오류:', error),
+                {
+                  enableHighAccuracy: true,
+                  maximumAge: 0,
+                  timeout: 5000
+                }
+              );
+            },
+            (error) => {
+              console.error('현재 위치를 가져올 수 없습니다:', error);
+              // 위치 정보를 가져올 수 없는 경우에도 지도는 초기화
+              mapService.current = new MapService(mapRef.current);
+              markerService.current = new MarkerService();
+              setIsMapReady(true);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 0
             }
-          },
-          (error) => {
-            console.error('현재 위치를 가져올 수 없습니다:', error);
-          }
-        );
+          );
+        }
+      } catch (error) {
+        console.error('Map initialization error:', error);
       }
     };
 
     initializeMap();
-  }, []);
-
-  // 실시간 위치 추적
-  useEffect(() => {
-    const startWatchingLocation = () => {
-      if (!navigator.geolocation) {
-        console.error('Geolocation is not supported by this browser.');
-        return;
-      }
-
-      const options = {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      };
-
-      locationWatcher.current = navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const updatedPosition = { latitude, longitude };
-          
-          setCurrentLocation(updatedPosition);
-
-          if (mapService.current) {
-            mapService.current.updateCurrentLocationMarker(updatedPosition);
-            mapService.current.panToLocation(updatedPosition);
-          }
-        },
-        (error) => {
-          console.error('실시간 위치 추적 실패:', error);
-          switch(error.code) {
-            case error.PERMISSION_DENIED:
-              alert("위치 정보 접근 권한이 거부되었습니다.");
-              break;
-            case error.POSITION_UNAVAILABLE:
-              alert("위치 정보를 사용할 수 없습니다.");
-              break;
-            case error.TIMEOUT:
-              alert("위치 정보 요청 시간이 초과되었습니다.");
-              break;
-            default:
-              alert("알 수 없는 오류가 발생했습니다.");
-          }
-        },
-        options
-      );
-    };
-
-    startWatchingLocation();
 
     return () => {
-      if (locationWatcher.current) {
-        navigator.geolocation.clearWatch(locationWatcher.current);
-        locationWatcher.current = null;
+      isSubscribed = false;
+      if (watchPositionId.current) {
+        navigator.geolocation.clearWatch(watchPositionId.current);
       }
     };
   }, []);
 
-  // 경로 그리기
+  // 필터 변경 감지 및 마커 업데이트
   useEffect(() => {
-    const drawRoute = async () => {
-      if (startCoords && goalCoords && routeService.current) {
+    if (!mapService.current || !markerService.current || !isMapReady) return;
+
+    const mapInstance = mapService.current.getMapInstance();
+    const center = mapInstance.getCenter();
+    const currentLocation = {
+      lat: center.lat(),
+      lng: center.lng()
+    };
+    
+    // 이전 상태와 현재 상태를 비교하여 변경된 필터만 처리
+    const currentFiltersSet = new Set(activeFilters);
+    
+    // 제거된 필터 처리
+    [...prevActiveFilters.current].forEach(filter => {
+      if (!currentFiltersSet.has(filter)) {
+        markerService.current.removeMarkers(filter);
+      }
+    });
+
+    // 새로 추가된 필터 처리
+    activeFilters.forEach(async (filter) => {
+      if (!prevActiveFilters.current.has(filter)) {
         try {
-          const result = await routeService.current.drawRoute(
-            startCoords, 
-            goalCoords, 
-            routeType
-          );
-          setRouteInfo(result);
+          const places = await fetchPlacesData(filter, currentLocation);
+          if (places && places.length > 0) {
+            markerService.current.toggleMarkers(mapInstance, places, filter);
+          }
         } catch (error) {
-          console.error('경로 그리기 실패:', error);
-          setRouteInfo({ error: '경로 검색에 실패했습니다.' });
+          console.error(`Error fetching places for ${filter}:`, error);
         }
       }
-    };
+    });
 
-    drawRoute();
-  }, [startCoords, goalCoords, routeType]);
+    // 현재 상태를 이전 상태로 저장
+    prevActiveFilters.current = currentFiltersSet;
+  }, [activeFilters, isMapReady]);
 
-  return (
-    <div style={{ 
-      position: 'absolute', 
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      width: '100%',
-      height: '100%'
-    }}>
-      {/* 경로 타입 선택 버튼 */}
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        zIndex: 100,
-        display: 'flex',
-        gap: '10px'
-      }}>
-        <button
-          onClick={() => setRouteType('normal')}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: routeType === 'normal' ? '#2db400' : '#fff',
-            color: routeType === 'normal' ? '#fff' : '#333',
-            border: '1px solid #2db400',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          일반 경로
-        </button>
-        <button
-          onClick={() => setRouteType('safe')}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: routeType === 'safe' ? '#4CAF50' : '#fff',
-            color: routeType === 'safe' ? '#fff' : '#333',
-            border: '1px solid #4CAF50',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          안전 경로
-        </button>
-      </div>
-
-      <div ref={mapRef} style={{ 
-        width: '100%', 
-        height: '100%',
-        position: 'absolute'
-      }} />
-
-      {routeInfo?.error && (
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '20px',
-          backgroundColor: '#fff3f3',
-          padding: '15px',
-          borderRadius: '8px',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-          color: '#ff0000',
-          zIndex: 100
-        }}>
-          {routeInfo.error}
-        </div>
-      )}
-    </div>
-  );
+  return <div ref={mapRef} style={{ width: '100%', height: '100%' }} />;
 };
 
 export default MapComponent;

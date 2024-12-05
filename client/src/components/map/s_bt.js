@@ -10,6 +10,7 @@ const RouteInfoPanel = ({
 }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const panelRef = useRef(null);
+  const panelClassName = `route-info-panel ${routeType === 'safe' ? 'safe-mode' : ''}`;
 
   // 패널 클릭 시 토글
   const handlePanelClick = () => {
@@ -25,7 +26,7 @@ const RouteInfoPanel = ({
       const currentY = e.touches[0].clientY;
       const deltaY = startY - currentY;
 
-      if (deltaY > 60) { // 위로 스와이프
+      if (deltaY > 50) { // 위로 스와이프
         setIsPanelOpen(true);
       } else if (deltaY < -50) { // 아래로 스와이프
         setIsPanelOpen(false);
@@ -44,7 +45,7 @@ const RouteInfoPanel = ({
   return (
     <div 
       ref={panelRef}
-      className={`settings-panel ${isPanelOpen ? 'open' : ''}`}
+      className={`settings-panel ${isPanelOpen ? 'open' : ''} ${routeType === 'safe' ? 'safe-mode' : ''}`}
       onClick={handlePanelClick}
       onTouchStart={handleTouchStart}
     >
@@ -58,12 +59,15 @@ const RouteInfoPanel = ({
             backgroundColor: 'white',
             padding: '15px',
             borderRadius: '8px',
-            minWidth: '200px'
+            minWidth: '200px',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
           }}>
             <div style={{ 
               fontSize: '16px', 
               fontWeight: 'bold',
-              marginBottom: '8px',
               color: '#333'
             }}>
               {routeType === 'normal' ? '도보 경로 정보' : '안전 경로 정보'}
@@ -71,7 +75,8 @@ const RouteInfoPanel = ({
             <div style={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '8px' 
+              gap: '12px',
+              flex: 1
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: '#666' }}>총 거리:</span>
@@ -117,7 +122,8 @@ const RouteInfoPanel = ({
             backgroundColor: '#fff3f3',
             padding: '15px',
             borderRadius: '8px',
-            color: '#ff0000'
+            color: '#ff0000',
+            height: '100%'
           }}>
             {routeInfo.error}
           </div>

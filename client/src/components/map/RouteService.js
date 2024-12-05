@@ -1,5 +1,4 @@
 /* global naver */
-
 class RouteService {
   constructor(mapInstance) {
     this.mapInstance = mapInstance;
@@ -43,30 +42,31 @@ class RouteService {
       const updateMarkers = () => {
         const size = calculateMarkerSize();
         const half = size / 2;
-
+      
         startMarker.setIcon({
-          url: '/images/start.png',
+          url: 'images/map/start.svg', // 경로 수정
           size: new naver.maps.Size(size, size),
           scaledSize: new naver.maps.Size(size, size),
           origin: new naver.maps.Point(0, 0),
-          anchor: new naver.maps.Point(half, half)
+          anchor: new naver.maps.Point(half, half),
         });
-
+      
         endMarker.setIcon({
-          url: '/images/goal.png',
+          url: 'images/map/goal.svg', // 경로 수정
           size: new naver.maps.Size(size, size),
           scaledSize: new naver.maps.Size(size, size),
           origin: new naver.maps.Point(0, 0),
-          anchor: new naver.maps.Point(half, half)
+          anchor: new naver.maps.Point(half, half),
         });
       };
+      
 
       // 출발지 마커 생성
       const startMarker = new naver.maps.Marker({
         position: new naver.maps.LatLng(startCoords.latitude, startCoords.longitude),
         map: this.mapInstance,
         icon: {
-          url: '/images/start.png',
+          url: 'images/map/start.svg',
           size: new naver.maps.Size(48, 48),
           scaledSize: new naver.maps.Size(48, 48),
           origin: new naver.maps.Point(0, 0),
@@ -79,7 +79,7 @@ class RouteService {
         position: new naver.maps.LatLng(goalCoords.latitude, goalCoords.longitude),
         map: this.mapInstance,
         icon: {
-          url: '/images/goal.png',
+          url: 'images/map/goal.svg',
           size: new naver.maps.Size(48, 48),
           scaledSize: new naver.maps.Size(48, 48),
           origin: new naver.maps.Point(0, 0),
@@ -170,12 +170,10 @@ class RouteService {
         position: new naver.maps.LatLng(cctv.latitude, cctv.longitude),
         map: this.mapInstance,
         icon: {
-          content: `
-            <div style="position: relative;">
-              <div style="width: 24px; height: 24px; background: #FFD700; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center;">
-                <div style="font-size: 10px; color: #000; font-weight: bold;">${cctv.cameraCount || 1}</div>
-              </div>
-            </div>`,
+          url: '/images/map/direction/CCTV.svg',
+          size: new naver.maps.Size(24, 24),
+          scaledSize: new naver.maps.Size(24, 24),
+          origin: new naver.maps.Point(0, 0),
           anchor: new naver.maps.Point(12, 12)
         }
       });
@@ -221,12 +219,10 @@ class RouteService {
         position: new naver.maps.LatLng(store.latitude, store.longitude),
         map: this.mapInstance,
         icon: {
-          content: `
-            <div style="position: relative;">
-              <div style="width: 24px; height: 24px; background: #00BFFF; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center;">
-                <div style="font-size: 12px; color: white;">편</div>
-              </div>
-            </div>`,
+          url: '/images/map/direction/store.svg',
+          size: new naver.maps.Size(24, 24),
+          scaledSize: new naver.maps.Size(24, 24),
+          origin: new naver.maps.Point(0, 0),
           anchor: new naver.maps.Point(12, 12)
         }
       });
