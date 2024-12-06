@@ -86,7 +86,7 @@ const safetyService = {
             cctv.longitude
           );
           
-          if (distance <= 80) {
+          if (distance <= 60) {
             if (!segmentHasCCTV) {
               coveredSegments++;
               segmentHasCCTV = true;
@@ -108,7 +108,7 @@ const safetyService = {
             store.longitude
           );
 
-          if (distance <= 80) {
+          if (distance <= 70) {
             if (!segmentHasStore) {
               coveredSegments++;
               segmentHasStore = true;

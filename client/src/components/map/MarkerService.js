@@ -6,6 +6,7 @@ class MarkerService {
     this.activeInfoWindow = null; // 현재 열린 정보창 저장
     this.infoWindows = new Map(); // 마커별 정보창 캐시
     this.clickTimeout = null; // 클릭 디바운스를 위한 타이머
+    this.addressCache = new Map(); // 주소 캐시 추가
   }
 
   // 마커 추가/제거 토글 메서드
@@ -70,19 +71,83 @@ class MarkerService {
 
   // 정보창 생성 메서드
   createInfoWindow(mapInstance, place, category) {
-    return new naver.maps.InfoWindow({
+    const uniqueId = `place-info-${place.latitude}-${place.longitude}`.replace(/\./g, '-');
+    
+    const infoWindow = new naver.maps.InfoWindow({
       content: `
-        <div style="padding: 15px; min-width: 200px;">
-          <h3 style="margin: 0 0 10px 0; font-size: 16px;">${place.name}</h3>
-          ${this.getKoreanPlaceInfo(category, place)}
+        <div style="
+          padding: 12px;
+          min-width: 150px;
+          max-width: 200px;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          font-family: 'Noto Sans KR', sans-serif;
+          background-color: rgba(255, 255, 255, 0.95);
+        ">
+          <h3 style="
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2D3436;
+            border-bottom: 1px solid #E8E8E8;
+            padding-bottom: 8px;
+          ">${place.name}</h3>
+          <div id="${uniqueId}" style="
+            font-size: 12px;
+            color: #636E72;
+            line-height: 1.5;
+          ">
+            ${this.getKoreanPlaceInfo(category, place)}
+          </div>
         </div>
       `,
       borderWidth: 0,
       disableAnchor: true,
       backgroundColor: 'white',
       borderColor: 'transparent',
-      pixelOffset: new naver.maps.Point(0, -10)
+      pixelOffset: new naver.maps.Point(0, -10),
+      zIndex: 100,
+      closeButton: true
     });
+
+    // 지도 줌 레벨에 따른 정보창 크기 조절
+    naver.maps.Event.addListener(mapInstance, 'zoom_changed', () => {
+      const zoom = mapInstance.getZoom();
+      const infoElement = document.getElementById(uniqueId);
+      if (infoElement) {
+        // 성능 최적화를 위한 디바운스 추가
+        if (this.zoomTimeout) {
+          clearTimeout(this.zoomTimeout);
+        }
+        this.zoomTimeout = setTimeout(() => {
+          if (zoom <= 13) {
+            infoElement.style.fontSize = '10px';
+            infoElement.parentElement.style.minWidth = '120px';
+            infoElement.parentElement.style.maxWidth = '160px';
+          } else if (zoom <= 15) {
+            infoElement.style.fontSize = '12px';
+            infoElement.parentElement.style.minWidth = '150px';
+            infoElement.parentElement.style.maxWidth = '200px';
+          } else {
+            infoElement.style.fontSize = '13px';
+            infoElement.parentElement.style.minWidth = '180px';
+            infoElement.parentElement.style.maxWidth = '240px';
+          }
+        }, 100);
+      }
+    });
+
+    // 기존 주소 정보 비동기 로드 로직 유지
+    naver.maps.Event.addListener(infoWindow, 'open', () => {
+      this.loadKoreanAddress(place.latitude, place.longitude).then(address => {
+        const infoContent = document.getElementById(uniqueId);
+        if (infoContent) {
+          infoContent.innerHTML = this.getKoreanPlaceInfo(category, place, address);
+        }
+      });
+    });
+
+    return infoWindow;
   }
 
   // 마커 클릭 이벤트 추가 메서드
@@ -144,53 +209,12 @@ class MarkerService {
     });
     this.markers.clear();
     this.infoWindows.clear();
+    this.addressCache.clear(); // 캐시 초기화 추가
   }
 
   // 한글 정보 생성 메서드
-  getKoreanPlaceInfo(category, place) {
-    // 한글 주소 가져오기
-    const getKoreanAddress = async (latitude, longitude) => {
-      try {
-        const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-        if (!apiKey) {
-          console.error('Google Maps API 키가 설정되지 않았습니다.');
-          return '주소 정보를 불러올 수 없습니다.';
-        }
-
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&language=ko&key=${apiKey}`
-        );
-        
-        if (!response.ok) {
-          throw new Error('주소 변환 API 응답 오류');
-        }
-
-        const data = await response.json();
-        if (data.status === 'OK' && data.results && data.results.length > 0) {
-          const address = data.results[0].formatted_address;
-          return address.replace(/대한민국 /, ''); // '대한민국' 텍스트 제거
-        } else {
-          console.error('주소 변환 실패:', data.status);
-          return '주소 정보를 불러올 수 없습니다.';
-        }
-      } catch (error) {
-        console.error('주소 변환 오류:', error);
-        return '주소 정보를 불러올 수 없습니다.';
-      }
-    };
-
-    let info = `<p style="margin: 5px 0;">주소: <span class="korean-address" data-lat="${place.latitude}" data-lng="${place.longitude}">주소 불러오는 중...</span></p>`;
-    
-    // 주소 비동기 변환
-    getKoreanAddress(place.latitude, place.longitude).then(koreanAddress => {
-      const addressElements = document.getElementsByClassName('korean-address');
-      Array.from(addressElements).forEach(element => {
-        if (element.dataset.lat === String(place.latitude) && 
-            element.dataset.lng === String(place.longitude)) {
-          element.textContent = koreanAddress;
-        }
-      });
-    });
+  getKoreanPlaceInfo(category, place, address = '주소 불러오는 중...') {
+    let info = `<p style="margin: 5px 0;">주소: ${address}</p>`;
     
     // 카테고리별 추가 정보
     switch(category) {
@@ -248,6 +272,35 @@ class MarkerService {
         background-size: contain;
       "></div>
     `;
+  }
+
+  // 새로운 메서드 추가
+  async loadKoreanAddress(latitude, longitude) {
+    const cacheKey = `${latitude},${longitude}`;
+    
+    if (this.addressCache.has(cacheKey)) {
+      return this.addressCache.get(cacheKey);
+    }
+
+    try {
+      const response = await fetch(
+        `/api/geocode?latitude=${latitude}&longitude=${longitude}`
+      );
+
+      if (!response.ok) {
+        throw new Error('주소 변환 API 응답 오류');
+      }
+
+      const data = await response.json();
+      if (data.address) {
+        this.addressCache.set(cacheKey, data.address);
+        return data.address;
+      }
+      return '주소 정보를 불러올 수 없습니다.';
+    } catch (error) {
+      console.error('주소 변환 오류:', error);
+      return '주소 정보를 불러올 수 없습니다.';
+    }
   }
 }
 

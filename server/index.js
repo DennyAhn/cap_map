@@ -3,7 +3,9 @@ const express = require("express");
 const cors = require("cors");
 const axios = require('axios');
 const geocodeRouter = require("./router/geocodeRouter");
+const geocode = require('./router/geocode');
 const directionRouter = require("./router/directionRouter");
+const placesRouter = require('./router/placesRouter');
 
 const app = express();
 const PORT = 3001;
@@ -22,8 +24,13 @@ app.get("/", (req, res) => {
 });
 
 // 라우터 연결
+
 app.use("/geocode", geocodeRouter);
+app.use('/api/geocode', geocode);
+
 app.use("/direction", directionRouter);
+
+app.use('/api/places', placesRouter);
 
 app.use(cors());
 
